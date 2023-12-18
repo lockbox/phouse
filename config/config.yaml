@@ -1,20 +1,45 @@
 detectors:
   startout:
     type: cpu
-  coral_tpu:
-    type: edgetpu
+  #coral_tpu:
+  #  type: edgetpu
+  #  device: ""
+
+mqtt:
+  host: pee-house.local
 
 ffmpeg:
-  global_args: -hide_banner -loglevel warning -threads 2
+  global_args: -hide_banner -loglevel debug -threads 2
   hwaccel_args: preset-rpi-64-h264
 
-camera:
+detect:
+  width: 640
+  height: 480
+
+record:
+  enabled: True
+
+cameras:
   house:
     enabled: True
     ffmpeg:
       inputs:
-        - path: somethigsn
+        - path: "/dev/video0"
           roles:
             - detect
             - record
-            - restream
+      input_args: -r 30 -f v4l2 -c:v h264_v4l2m2m -use_wallclock_as_timestamps 1 -s:v 640x480 -fflags +genpts+discardcorrupt
+
+objects:
+  track:
+    - person
+    - cat
+
+motion:
+  threshold: 20
+  contour_area: 10
+
+snapshots:
+  enabled: True
+  timestamp: True
+  bounding_box: True
